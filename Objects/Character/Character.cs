@@ -11,6 +11,12 @@ namespace TextAdventureGame.Objects.Character
         protected int _attackPoints;
         protected int _defensePoints;
 
+        public string Name { get; }
+        public int Health {get;}
+        public int AttackPoints { get; }
+        public int DefensePoints { get; }
+        public Inventory Inventory { get; private set; }
+
         public Character(string name, int maxHealth, int attackPoints, int defensePoints)
         {
             _inventory = new Inventory();
@@ -21,7 +27,13 @@ namespace TextAdventureGame.Objects.Character
             _defensePoints = defensePoints;
         }
 
-        public virtual void Attack(Character opponent) => opponent._health -= _attackPoints;
+        public virtual void Attack(Character opponent) => opponent.TakeDamage(_attackPoints);
+        public virtual void TakeDamage(int amount)
+        {
+            int reduceDamage = Math.Max(amount - _defensePoints, 0);
+            _health = Math.Max(_health - reduceDamage, 0);
+        }
+
         public virtual void EquipItem(Item item)
         {
             if(item.Type == ItemType.Weapon)
