@@ -1,4 +1,6 @@
-﻿namespace TextAdventureGame.Objects.InventorySystem
+﻿using System.Xml.Linq;
+
+namespace TextAdventureGame.Objects.InventorySystem
 {
 
     public class Inventory
@@ -17,8 +19,7 @@
                 _items.Add(item);
             else if (_items.Contains(item))
             {
-                item.Amount++;
-                _items.Add(item);
+                item.Quantity++;
             }
         }
 

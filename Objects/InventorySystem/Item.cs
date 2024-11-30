@@ -1,19 +1,27 @@
-﻿namespace TextAdventureGame.Objects.InventorySystem
+﻿using TextAdventureGame.Objects.Character;
+
+namespace TextAdventureGame.Objects.InventorySystem
 {
     public class Item
     {
-        public ItemType Type;
         public string Name;
-        public string? Description;
+        public string Description;
+        public ItemType Type;
         public int Value;
-        public int Amount;
-        public bool IsEquipped {  get; set; }
+        public int Quantity = 1;
+        public bool IsEquipped;
 
-        public Item(ItemType type, string name, int value)
+        public Item(ItemType type, string name, int value, string description)
         {
             Type = type;
             Name = name;
+            Description = description;
             Value = value;
+        }
+
+        public override string ToString()
+        {
+            return $"{Name} (x{Quantity})";
         }
     }
 }
