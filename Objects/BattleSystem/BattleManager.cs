@@ -3,24 +3,26 @@ using TextAdventureGame.Objects.Character;
 using TextAdventureGame.Objects.Game;
 using TextAdventureGame.Objects.InventorySystem;
 using TextAdventureGame.Objects.UI;
+public enum Turn { PlayerTurn, EnemyTurn }
 
 namespace TextAdventureGame.Objects.BattleSystem
 {
+
     public class BattleManager
     {
+        public static Turn Turn;
         public static CharacterBase currentPlayer;
-        public static CharacterBase currentEnemy;
+        public static int currentEnemyIndex;
         public static List<CharacterBase> battleEnemies;
 
 
         public static void StartBattle(CharacterBase player, List<CharacterBase> enemies)
         {
-            battleEnemies = new();
-            battleEnemies = enemies;
+            battleEnemies = new(enemies);
             currentPlayer = player;
-            currentEnemy = enemies[0];
+            currentEnemyIndex = 0;
 
-            foreach(var enemy in enemies)
+            foreach (var enemy in enemies)
             {
                 enemy.OnDeath += HandleEnemyDeath;
                 enemy.OnHealthChanged += (character, newHealth) => HandleOnHealthChanged(character, newHealth);
@@ -29,27 +31,24 @@ namespace TextAdventureGame.Objects.BattleSystem
             player.OnHealthChanged += (character, newHealth) => HandleOnHealthChanged(character, newHealth);
             player.OnDeath += HandlePlayerDeath;
 
-            while(player.IsAlive() && enemies.Count > 0)
+            while (player.IsAlive() && battleEnemies.Any(e => e.IsAlive()))
             {
-                GameUI.DisplayBattleStatus(player, enemies);
-                GameUI.DisplayTurnTransition("Player");
-                HandlePlayerTurn(player, currentEnemy);
+                Turn = Turn.PlayerTurn;
+                GameUI.DisplayBattleStatus(player, battleEnemies);
+                HandlePlayerTurn(currentPlayer, battleEnemies[currentEnemyIndex]);
 
-                if (!currentEnemy.IsAlive() && enemies.Count > 0)
-                {
-                    enemies.RemoveAt(0);
-                    if(enemies.Count > 0)
-                        currentEnemy = enemies[0];
-                }
+                Turn = Turn.EnemyTurn;
+                CycleEnemyTurn(player);
 
-                GameUI.DisplayBattleStatus(player, enemies);
-                GameUI.DisplayTurnTransition("Enemy");
-                HandleEnemyTurn(player, currentEnemy);
                 Console.ReadLine();
-
             }
 
-            foreach(var enemy in enemies)
+            CleanupEventHandlers(player, enemies);
+        }
+
+        private static void CleanupEventHandlers(CharacterBase player, List<CharacterBase> enemies)
+        {
+            foreach (var enemy in enemies)
             {
                 enemy.OnDeath -= HandleEnemyDeath;
                 enemy.OnHealthChanged -= HandleOnHealthChanged;
@@ -69,7 +68,7 @@ namespace TextAdventureGame.Objects.BattleSystem
             //Console.Clear();
             var characterTurn = character is Enemy ? "Enemy" : "Player";
             GameUI.DisplayTurnTransition(characterTurn);
-            GameUI.DisplayBattleFeedback(character, null, $"{character.Name}'s health is now {newHealth}/{character.MaxHealth}.");
+            GameUI.DisplayBattleFeedback(character, null, $" {character.Name}'s health is now {newHealth}/{character.MaxHealth}.");
             GameUI.DisplayBattleFrames(currentPlayer, battleEnemies);
         }
 
@@ -78,21 +77,48 @@ namespace TextAdventureGame.Objects.BattleSystem
             enemy = null;
         }
 
+        private static void CycleEnemyTurn(CharacterBase player)
+        {
+            int enemiesCount = battleEnemies.Count;
+
+            for (int i = 0; i < enemiesCount; i++)
+            {
+                currentEnemyIndex = (currentEnemyIndex + 1) % enemiesCount;
+                var currentEnemy = battleEnemies[currentEnemyIndex];
+
+                if (currentEnemy.IsAlive())
+                {
+                    GameUI.DisplayBattleStatus(player, battleEnemies);
+                    HandleEnemyTurn(player, currentEnemy);
+                }
+            }
+        }
+
         private static void HandleEnemyTurn(CharacterBase player, CharacterBase currentEnemy)
         {
+            Random random = new Random();
+            Thread.Sleep(2000);
 
-            if(currentEnemy.Health < currentEnemy.MaxHealth * 0.2 &&
+            if (currentEnemy.Health < currentEnemy.MaxHealth * 0.2 &&
                 currentEnemy.Inventory.GetInventory().Any(i => i.Type == ItemType.Consumable))
             {
                 UseConsumables(currentEnemy);
             }
             else
             {
-                Thread.Sleep(2000);
-                currentEnemy.Attack(player);
-                GameUI.DisplayBattleFeedback(player, currentEnemy, $"{currentEnemy.Name} attacks {player.Name} for {currentEnemy.CalculateAttackDamage(player)}");
+                //Thread.Sleep(2000);
+                //random.Next(1, 2);
+                if(random.Next(0, 3) == 0)
+                {
+                    currentEnemy.Defend();
+                    GameUI.DisplayBattleFeedback(player, currentEnemy, $" {currentEnemy.Name} reduces {player.Name}'s attack by half.");
+                }
+                else
+                {
+                    currentEnemy.Attack(player);
+                    GameUI.DisplayBattleFeedback(player, currentEnemy, $" {currentEnemy.Name} attacks {player.Name} for {currentEnemy.CalculateAttackDamage(player)}");
+                }
             }
-
         }
 
         private static void UseConsumables(CharacterBase currentEnemy)
@@ -109,13 +135,13 @@ namespace TextAdventureGame.Objects.BattleSystem
 
         private static void HandlePlayerTurn(CharacterBase player, CharacterBase currentEnemy)
         {
-            Console.WriteLine("\nActions:");
-            Console.WriteLine("[1] Attack    [2] Defend    [3] Inventory    [4] End \n");
+            Console.WriteLine("\n Actions:");
+            Console.Write(" [1] Attack    [2] Defend    [3] Inventory    [ENTER] End Turn    ");
 
             string? input = Console.ReadLine();
             if (!int.TryParse(input, out int inputNumber) || inputNumber < 1 || inputNumber > 4)
             {
-                Console.WriteLine("Invalid choice. Please enter a number between 1 and 4.");
+                Console.WriteLine(" Invalid choice. Please enter a number between 0 and 4.");
                 return;
             }
 

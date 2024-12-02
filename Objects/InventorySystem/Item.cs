@@ -17,6 +17,12 @@ namespace TextAdventureGame.Objects.InventorySystem
             Name = name;
             Description = description;
             Value = value;
+            IsEquipped = false;
+        }
+
+        public Item Clone()
+        {
+            return new Item(Type, Name, Value, Description);
         }
 
         public override string ToString()

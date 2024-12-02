@@ -24,15 +24,17 @@ namespace TextAdventureGame.Objects.Game
             {
                 case 1:
                     player.Attack(opponent);
-                    GameUI.DisplayBattleFeedback(player, opponent, $"{player.Name} attacks {opponent.Name} for {player.CalculateAttackDamage(opponent)}");
+                    if (opponent.IsDefending)
+                        GameUI.DisplayBattleFeedback(player, opponent, $" {player.Name} attacks {opponent.Name} for {player.Damage / 2}");
+                    else
+                        GameUI.DisplayBattleFeedback(player, opponent, $" {player.Name} attacks {opponent.Name} for {player.Damage}");
                     break;
                 case 2:
-                    int reducedDamage = opponent.AttackPoints - player.DefensePoints;
-                    player.Defend(opponent);
-                    GameUI.DisplayBattleFeedback(player, opponent, $"{player.Name} reduces attack damage from {reducedDamage} to {opponent.CalculateAttackDamage(player)}");
+                    player.Defend();
+                    GameUI.DisplayBattleFeedback(player, opponent, $" {player.Name} reduces {opponent.Name}'s next attack by half.");
                     break;
                 case 3:
-                    player.DisplayInventory(player.Inventory.GetInventory());
+                    player.CheckInventory(player.Inventory.GetInventory());
                     break;
                 default:
                     Console.WriteLine("Please Enter a Valid Input");
