@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
-using TextAdventureGame.Objects.Character;
+﻿using TextAdventureGame.Objects.Character;
 using TextAdventureGame.Objects.Game;
 using TextAdventureGame.Objects.InventorySystem;
 using TextAdventureGame.Objects.UI;
+
 public enum Turn { PlayerTurn, EnemyTurn }
 
 namespace TextAdventureGame.Objects.BattleSystem
@@ -11,10 +11,9 @@ namespace TextAdventureGame.Objects.BattleSystem
     public class BattleManager
     {
         public static Turn Turn;
-        public static CharacterBase currentPlayer;
+        public static CharacterBase? currentPlayer;
         public static int currentEnemyIndex;
-        public static List<CharacterBase> battleEnemies;
-
+        public static List<CharacterBase>? battleEnemies;
 
         public static void StartBattle(CharacterBase player, List<CharacterBase> enemies)
         {
@@ -22,6 +21,25 @@ namespace TextAdventureGame.Objects.BattleSystem
             currentPlayer = player;
             currentEnemyIndex = 0;
 
+            InitEventHandlers(player, enemies);
+
+            while (player.IsAlive() && battleEnemies.Any(e => e.IsAlive()))
+            {
+                Turn = Turn.PlayerTurn;
+                GameUI.DisplayBattleStatus(player, battleEnemies);
+                HandlePlayerTurn(player, battleEnemies[currentEnemyIndex]);
+
+                Turn = Turn.EnemyTurn;
+                CycleEnemyTurn(player);
+
+                //Console.ReadLine();
+            }
+
+            CleanupEventHandlers(player, enemies);
+        }
+
+        private static void InitEventHandlers(CharacterBase player, List<CharacterBase> enemies)
+        {
             foreach (var enemy in enemies)
             {
                 enemy.OnDeath += HandleEnemyDeath;
@@ -30,20 +48,6 @@ namespace TextAdventureGame.Objects.BattleSystem
 
             player.OnHealthChanged += (character, newHealth) => HandleOnHealthChanged(character, newHealth);
             player.OnDeath += HandlePlayerDeath;
-
-            while (player.IsAlive() && battleEnemies.Any(e => e.IsAlive()))
-            {
-                Turn = Turn.PlayerTurn;
-                GameUI.DisplayBattleStatus(player, battleEnemies);
-                HandlePlayerTurn(currentPlayer, battleEnemies[currentEnemyIndex]);
-
-                Turn = Turn.EnemyTurn;
-                CycleEnemyTurn(player);
-
-                Console.ReadLine();
-            }
-
-            CleanupEventHandlers(player, enemies);
         }
 
         private static void CleanupEventHandlers(CharacterBase player, List<CharacterBase> enemies)
@@ -79,6 +83,8 @@ namespace TextAdventureGame.Objects.BattleSystem
 
         private static void CycleEnemyTurn(CharacterBase player)
         {
+            if (!player.IsAlive()) return;
+
             int enemiesCount = battleEnemies.Count;
 
             for (int i = 0; i < enemiesCount; i++)
@@ -96,7 +102,7 @@ namespace TextAdventureGame.Objects.BattleSystem
 
         private static void HandleEnemyTurn(CharacterBase player, CharacterBase currentEnemy)
         {
-            Random random = new Random();
+            Random random = new();
             Thread.Sleep(2000);
 
             if (currentEnemy.Health < currentEnemy.MaxHealth * 0.2 &&
@@ -119,6 +125,8 @@ namespace TextAdventureGame.Objects.BattleSystem
                     GameUI.DisplayBattleFeedback(player, currentEnemy, $" {currentEnemy.Name} attacks {player.Name} for {currentEnemy.CalculateAttackDamage(player)}");
                 }
             }
+
+            Console.ReadLine();
         }
 
         private static void UseConsumables(CharacterBase currentEnemy)

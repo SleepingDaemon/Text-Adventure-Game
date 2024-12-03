@@ -1,4 +1,6 @@
-﻿using TextAdventureGame.Objects.InventorySystem;
+﻿using TextAdventureGame.Objects.BattleSystem;
+using TextAdventureGame.Objects.InventorySystem;
+using TextAdventureGame.Objects.UI;
 
 namespace TextAdventureGame.Objects.Character
 {
@@ -7,6 +9,20 @@ namespace TextAdventureGame.Objects.Character
         public Player(CharacterType type, string name, int maxHealth, int attackPoints, int defensePoints) : base(type, name, maxHealth, attackPoints, defensePoints)
         {
             _inventory = new Inventory();
+        }
+
+        public override void TakeDamage(int amount)
+        {
+            base.TakeDamage(amount);
+
+            if (_health < _maxHealth * 0.5)
+            {
+                GameUI.UpdatePortrait(this, "hurt");
+                if(BattleManager.battleEnemies != null)
+                    GameUI.DisplayBattleFrames(this, BattleManager.battleEnemies);
+                else
+                    Console.WriteLine("Battle enemies collection is null");
+            }
         }
 
         public void CheckInventory(List<Item> inventory)

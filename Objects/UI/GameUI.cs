@@ -47,9 +47,10 @@ namespace TextAdventureGame.Objects.UI
             List<string[]> statsBoxes = new();
             List<string[]> portraits = new();
 
-            foreach(var character in characters)
+            for (int i = 0; i < characters.Count; i++)
             {
-                statsBoxes.Add(GetCharacterBoxLines(character));
+                CharacterBase? character = characters[i];
+                statsBoxes.Add(GetCharacterBoxLines(character, i + 1));
                 portraits.Add(GetEnemyPortrait(character.Name));
             }
 
@@ -74,13 +75,17 @@ namespace TextAdventureGame.Objects.UI
             }
         }
 
-        static string[] GetCharacterBoxLines(CharacterBase character)
+        static string[] GetCharacterBoxLines(CharacterBase character, int? enemyIndex = null)
         {
             int maxTextWidth = 24;
 
+            string characterType = enemyIndex.HasValue
+                ? $"{character.Type}({enemyIndex.Value})"
+                : character.Type.ToString();
+
             return
             [
-                $" {FormatBoxText(character.Type.ToString(), maxTextWidth + 3)}",
+                $" {FormatBoxText(characterType, maxTextWidth + 21)}",
                 $" ┌─────────────────────────┬",
                 $" │ {FormatBoxText(character.Name, maxTextWidth)}│",
                 $" │ HP  {FormatBoxText(character.Health.ToString() + "/" + character.MaxHealth.ToString(), maxTextWidth - 4)}│",
@@ -94,125 +99,15 @@ namespace TextAdventureGame.Objects.UI
 
         static string[] GetEnemyPortrait(string enemyName)
         {
-            string[]? portraitExpressions = null;
-            int maxTextWidth = 16;
-
-            switch (enemyName)
-            {
-                case "Warbot":
-                    portraitExpressions = [
-                        " ",
-                        $"──────────────────┐",
-                        $" {FormatBoxText(@"  _/ _ -  _\_   ", maxTextWidth)} │",
-                        $" {FormatBoxText(@" / // \ / \\ \  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"| \\[+] [+]// | ", maxTextWidth)} │",
-                        $" {FormatBoxText(@" \|/  / \  \|/  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"    \|===|/     ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"  _/ \───/ \_   ", maxTextWidth)} │",
-                        $"──────────────────┘"
-                    ];
-                    break;
-                default:
-                    Console.WriteLine("No portrait found.");
-                    break;
-            }
-
-            return portraitExpressions;
-        }
-
-        static string[] GetPlayerExpression(string expression)
-        {
-            string[]? portraitExpressions = null;
-            int maxTextWidth = 16;
-
-            switch (expression)
-            {
-                case "regular":
-                    portraitExpressions = [
-                        " ",
-                        $"──────────────────┐",
-                        $" {FormatBoxText(@" /_/ _ '\' ─ \  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@" /  /_\| \_'\'\ ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"/_│ |o   o\/│ |\", maxTextWidth)} │",
-                        $" {FormatBoxText(@"  |/   U   /|/  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"    \ --- /     ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"   /|\───/|\    ", maxTextWidth)} │",
-                        $"──────────────────┘"
-                    ];
-                    break;
-                case "hurt":
-                    portraitExpressions = [
-                        " ",
-                        $"──────────────────┐",
-                        $" {FormatBoxText(@" /_/ _ '\' ─ \  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@" /  /_\| \_'\'\ ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"/_│ |@   @\/│ |\", maxTextWidth)} │",
-                        $" {FormatBoxText(@"  |/   U   /|/  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"    \ (_) /     ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"   /|\───/|\    ", maxTextWidth)} │",
-                        $"──────────────────┘"
-                    ];
-                    break;
-                case "cocky":
-                    portraitExpressions = [
-                        " ",
-                        $"──────────────────┐",
-                        $" {FormatBoxText(@" /_/ _ '\' ─ \  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@" /  /_\| \_'\'\ ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"/_│ |*   *\/│ |\", maxTextWidth)} │",
-                        $" {FormatBoxText(@"  |/   U   /|/  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"    \ <_> /     ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"   /|\───/|\    ", maxTextWidth)} │",
-                        $"──────────────────┘"
-                    ];
-                    break;
-                case "dead":
-                    portraitExpressions = [
-                        " ",
-                        $"──────────────────┐",
-                        $" {FormatBoxText(@" /_/ _ '\' ─ \  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@" /  /_\| \_'\'\ ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"/_│ |X   X\/│ |\", maxTextWidth)} │",
-                        $" {FormatBoxText(@"  |/   U   /|/  ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"    \ [X] /     ", maxTextWidth)} │",
-                        $" {FormatBoxText(@"   /|\───/|\    ", maxTextWidth)} │",
-                        $"──────────────────┘"
-                    ];
-                    break;
-                default:
-                    Console.WriteLine("No portrait found.");
-                    break;
-            }
-
-            return portraitExpressions;
+            return PortraitUI.GetEnemyPortrait(enemyName);
         }
 
         static string[] GetPlayerPortrait(CharacterBase character)
         {
-            int maxTextWidth = 16;
-            Dictionary<string, string[]> expressions = new Dictionary<string, string[]>();
-            string[] expressionNames = 
-            {
-                "regular",
-                "hurt",
-                "cocky",
-                "dead"
-            };
-
-            for (int i = 0; i < expressions.Count; i++)
-            {
-                if (!expressions.ContainsKey(expressionNames[i]))
-                {
-                    expressions.Add(expressionNames[i], GetPlayerExpression(expressionNames[i]));
-                }
-            }
-
-            
-
-            return GetPlayerExpression("regular");
+            return PortraitUI.GetPlayerExpression("regular");
         }
 
-        static string FormatBoxText(string text, int maxWidth)
+        public static string FormatBoxText(string text, int maxWidth)
         {
             return text.PadRight(maxWidth);
         }
@@ -238,6 +133,13 @@ namespace TextAdventureGame.Objects.UI
             Console.WriteLine(" ---------");
             Console.WriteLine(feedback);
             Console.WriteLine();
+        }
+
+        public static void UpdatePortrait(CharacterBase character, string expression)
+        {
+            string[] portrait = character is Player 
+                ? PortraitUI.GetPlayerExpression(expression.ToLower()) 
+                : PortraitUI.GetEnemyPortrait(character.Name.ToLower());
         }
     }
 }

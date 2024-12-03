@@ -4,12 +4,13 @@
     {
         private int _roomNumber = 0;
         private bool _hasEnemy = false;
+        private bool _isBossRoom = false;
         private bool _hasItem = false;
         private bool _isATrap = false;
 
-        public void EnterRoom(Room room)
+        public Room(int roomNumber)
         {
-            
+            _roomNumber = roomNumber;
         }
     }
 }
