@@ -2,9 +2,9 @@
 {
     public class PortraitUI
     {
-        private static readonly Dictionary<string, string[]> PlayerExpressions = [];
-        private static readonly Dictionary<string, string[]> EnemyPortraits = [];
-        private const int MAX_TEXT_WIDTH = 16;
+        private static readonly Dictionary<string, string[]> _playerExpressions = [];
+        private static readonly Dictionary<string, string[]> _enemyPortraits = [];
+        public const int MAX_TEXT_WIDTH = 16;
 
         static PortraitUI()
         {
@@ -14,7 +14,7 @@
 
         private static void InitializeEnemyPortraits(int maxTextWidth)
         {
-            PlayerExpressions["regular"] =
+            _playerExpressions["regular"] =
             [
                 " ",
                 $"──────────────────┐",
@@ -27,7 +27,7 @@
                 $"──────────────────┘"
             ];
 
-            PlayerExpressions["hurt"] =
+            _playerExpressions["hurt"] =
             [
                 " ",
                 $"──────────────────┐",
@@ -40,8 +40,8 @@
                 $"──────────────────┘"
             ];
 
-            PlayerExpressions["cocky"] = new[]
-            {
+            _playerExpressions["cocky"] =
+            [
                 " ",
                 $"──────────────────┐",
                 $" {GameUI.FormatBoxText(@" /_/ _ '\' ─ \  ", maxTextWidth)} │",
@@ -51,9 +51,9 @@
                 $" {GameUI.FormatBoxText(@"    \ <_> /     ", maxTextWidth)} │",
                 $" {GameUI.FormatBoxText(@"   /|\───/|\    ", maxTextWidth)} │",
                 $"──────────────────┘"
-            };
+            ];
 
-            PlayerExpressions["dead"] = [
+            _playerExpressions["dead"] = [
                 " ",
                 $"──────────────────┐",
                 $" {GameUI.FormatBoxText(@" /_/ _ '\' ─ \  ", maxTextWidth)} │",
@@ -68,7 +68,7 @@
 
         private static void InitializePlayerExpressions(int maxTextWidth)
         {
-            EnemyPortraits["Warbot"] = [
+            _enemyPortraits["Warbot"] = [
                 " ",
                 $"──────────────────┐",
                 $" {GameUI.FormatBoxText(@"  _/ _ -  _\_   ", maxTextWidth)} │",
@@ -83,14 +83,14 @@
 
         public static string[] GetPlayerExpression(string expression)
         {
-            return PlayerExpressions.TryGetValue(expression, out var portrait) 
+            return _playerExpressions.TryGetValue(expression, out var portrait) 
                 ? portrait 
                 : [];
         }
 
         public static string[] GetEnemyPortrait(string enemyName)
         {
-            return EnemyPortraits.TryGetValue(enemyName, out var portrait)
+            return _enemyPortraits.TryGetValue(enemyName, out var portrait)
                 ? portrait
                 : [];
         }

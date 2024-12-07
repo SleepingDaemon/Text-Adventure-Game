@@ -1,0 +1,17 @@
+﻿Commands		| Action
+____________________
+Go[direction]	| Move to a room in the specified direction
+View Stats		| Display player's current stats
+View Inventory	| Display player's inventory
+Save			| Save current game state
+Load			| Load previous save state
+Quit			| Exit the game
+
+
+Commands[Battle]| Action
+____________________
+Attack			| Attack an enemy
+	Choose Enemy	| Choose an enemy if multiple enemies is true
+Defend			| Reduce damage taken
+View Inventory	| Display player's inventory
+Quit			| Exit the game

@@ -1,14 +1,57 @@
 ﻿using TextAdventureGame.Objects.BattleSystem;
 using TextAdventureGame.Objects.InventorySystem;
+using TextAdventureGame.Objects.RoomSystem;
 using TextAdventureGame.Objects.UI;
 
 namespace TextAdventureGame.Objects.Character
 {
     public class Player : CharacterBase
     {
+        public int xPos { get; set; }
+        public int yPos { get; set; }
+        public HashSet<string> CompletedEvents { get; set; } = [];
+
         public Player(CharacterType type, string name, int maxHealth, int attackPoints, int defensePoints) : base(type, name, maxHealth, attackPoints, defensePoints)
         {
             _inventory = new Inventory();
+        }
+
+        public void MoveTo(string direction, Node[,] map)
+        {
+            Node currentNode = map[xPos, yPos];
+            currentNode.IsDiscovered = true;
+
+            if (currentNode.Connections.ContainsKey(direction))
+            {
+                if (direction == "up") xPos--;
+                else if (direction == "down") xPos++;
+                else if(direction == "left") yPos--;
+                else if(direction == "right") yPos++;
+
+                // Reveal the new node
+                Node newNode = map[xPos, yPos];
+                newNode.IsDiscovered = true;
+
+                Console.Clear();
+                Console.WriteLine($"\n You moved {direction}");
+                Console.Write(newNode.Description);
+                Console.ReadLine();
+
+                if(newNode.HasEnemy && !newNode.IsCleared)
+                {
+                    List<CharacterBase> enemies = new();
+                    CharacterBase enemy1 = new Enemy(CharacterType.Enemy, "Warbot", 25, 8, 3);
+                    CharacterBase enemy2 = new Enemy(CharacterType.Enemy, "Warbot", 25, 8, 3);
+                    enemies.Add(enemy1);
+                    enemies.Add(enemy2);
+
+                    BattleManager.StartBattle(this, enemies, newNode);
+                }
+
+                MapUI.DisplayMap(map, xPos, yPos);
+            }
+            else
+                Console.WriteLine(" You can't move in that direction!");
         }
 
         public override void TakeDamage(int amount)

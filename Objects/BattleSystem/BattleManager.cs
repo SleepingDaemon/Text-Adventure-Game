@@ -1,6 +1,7 @@
 ﻿using TextAdventureGame.Objects.Character;
 using TextAdventureGame.Objects.Game;
 using TextAdventureGame.Objects.InventorySystem;
+using TextAdventureGame.Objects.RoomSystem;
 using TextAdventureGame.Objects.UI;
 
 public enum Turn { PlayerTurn, EnemyTurn }
@@ -15,7 +16,7 @@ namespace TextAdventureGame.Objects.BattleSystem
         public static int currentEnemyIndex;
         public static List<CharacterBase>? battleEnemies;
 
-        public static void StartBattle(CharacterBase player, List<CharacterBase> enemies)
+        public static void StartBattle(CharacterBase player, List<CharacterBase> enemies, Node currentNode)
         {
             battleEnemies = new(enemies);
             currentPlayer = player;
@@ -23,18 +24,22 @@ namespace TextAdventureGame.Objects.BattleSystem
 
             InitEventHandlers(player, enemies);
 
-            while (player.IsAlive() && battleEnemies.Any(e => e.IsAlive()))
+            if(currentNode.HasEnemy && !currentNode.IsCleared)
             {
-                Turn = Turn.PlayerTurn;
-                GameUI.DisplayBattleStatus(player, battleEnemies);
-                HandlePlayerTurn(player, battleEnemies[currentEnemyIndex]);
+                while (player.IsAlive() && battleEnemies.Any(e => e.IsAlive()))
+                {
+                    Turn = Turn.PlayerTurn;
+                    GameUI.DisplayBattleStatus(player, battleEnemies);
+                    HandlePlayerTurn(player, battleEnemies[currentEnemyIndex]);
 
-                Turn = Turn.EnemyTurn;
-                CycleEnemyTurn(player);
+                    Turn = Turn.EnemyTurn;
+                    CycleEnemyTurn(player);
 
-                //Console.ReadLine();
+                    //Console.ReadLine();
+                }
             }
 
+            currentNode.IsCleared = true;
             CleanupEventHandlers(player, enemies);
         }
 

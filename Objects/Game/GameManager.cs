@@ -3,9 +3,20 @@ using TextAdventureGame.Objects.UI;
 
 namespace TextAdventureGame.Objects.Game
 {
+    public enum GameState
+    {
+        None,
+        MainMenu,
+        Active,
+        World,
+        Battle,
+        Puzzle,
+    }
+
     public class GameManager
     {
         private static GameManager? _instance;
+        private GameState _state;
         private bool _foundKey = false;
 
         public static GameManager Instance
